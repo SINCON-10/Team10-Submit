@@ -1,0 +1,12 @@
+# run_quick.sh run from a fresh extract of SINCON_2026_쉽조~.zip (folder name with Korean and ~), 2026-11-13 18:33, PY_LGB python 3.13.14 / PY_CAT python 3.12.14
+[0/3] provided data (data/raw) sha256
+  train.csv     OK
+  test.csv      OK
+  metaData.csv  OK
+[1/3] C25c: rebuild C15 / C17 / C19 from the pieces (asserted inside), then 3000-tree E in 7 sets and 4000-tree A in 7 sets
+submission_RQ_C25c.csv c677c91b | E3K ['att', 'att_ball', 'att_smc', 'att_ball_smc', 'attwx', 'attwx_smc', 'att_d4'] ['att_d4_e3kp'] | A4K ['att', 'att_ball', 'att_ball_smc', 'att_d4', 'att_smc', 'attwx', 'attwx_smc'] | rmse vs C19_add_ball_smc 0.0106, mean +0.0006, max |d| 0.282, concert-3127 rows max |d| 0.0e+00
+[2/3] C29 = C25c + weekend/holiday level correction (B1 .285, B2 .190) + weekday hour term (B3 .105)
+  weekday hr52 term: B3 0.105, rows 95,778, adjustment sd 0.0053, mean +0.0000
+[3/3] format check and comparison with the submitted file
+PASS submission_RQ_C29.csv sha256 285f61657b8301f4c87caf0adcd360941d3db8e3320552734cf30f20fbd85d72 | rows 157,194 mean 331.254
+rebuilt C29 sha256 285f61657b8301f4 | submitted 285f61657b8301f4 | max |diff| 0.000000 boardings -> IDENTICAL

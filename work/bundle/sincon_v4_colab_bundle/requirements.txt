@@ -1,0 +1,13 @@
+numpy>=1.26,<3
+pandas>=2.2,<3
+scipy>=1.15,<2
+scikit-learn==1.7.2
+lightgbm==4.7.0
+catboost==1.2.10
+xgboost==3.0.5
+pyarrow==20.0.0
+neuralforecast==3.1.2
+pytorch-lightning==2.5.5
+torchmetrics==1.8.2
+ray[tune]==2.49.2
+optuna==4.5.0

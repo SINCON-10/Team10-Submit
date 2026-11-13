@@ -1,0 +1,13 @@
+swap_check.py (2026-11-13 18:18): fixed C19 recipe on the three validation origins, E -> 3000 trees and A -> 4000 trees in the C25c sets (A4K_KEEP27=1). o0430 att_d4 runs were not finished (listed as missing; those sets keep the 500-tree model there).
+o0227 [123d]
+   +E3k   vs C19: full 0.157123->0.156400 (-0.000723) | early -0.000427 | ordinary -0.000640 | 3127 +0.00002
+   +A4k   vs C19: full 0.157123->0.156356 (-0.000767) | early -0.000440 | ordinary -0.000656 | 3127 +0.00000
+   +both  vs C19: full 0.157123->0.155983 (-0.001141) | early -0.000542 | ordinary -0.000939 | 3127 +0.00002
+o0331 [91d]
+   +E3k   vs C19: full 0.150486->0.149350 (-0.001136) | ordinary -0.001054 | 3127 +0.00075
+   +A4k   vs C19: full 0.150486->0.149537 (-0.000948) | ordinary -0.000761 | 3127 +0.00000
+   +both  vs C19: full 0.150486->0.148548 (-0.001938) | ordinary -0.001683 | 3127 +0.00075
+o0430 [61d] missing ['E3k:att_d4', 'A4k:att_d4']
+   +E3k   vs C19: full 0.146993->0.146390 (-0.000602) | ordinary -0.000682 | 3127 +0.00018
+   +A4k   vs C19: full 0.146993->0.146623 (-0.000370) | ordinary -0.000413 | 3127 +0.00000
+   +both  vs C19: full 0.146993->0.146121 (-0.000871) | ordinary -0.000988 | 3127 +0.00018

@@ -1,0 +1,32 @@
+Fri Nov 13 07:46:21     2026
+==> $W/out/final_att_AEH.log <==
+E saved 1001s mean 5.3725
+H saved 1001s mean 5.3653
+
+==> $W/out/final_att_C.log <==
+loaded 17s, att rows train 7,398 test 630 (35 games)
+C saved 568s mean 5.3508
+
+==> $W/out/att_s7_AEH_o0227.log <==
+o0227 lgb done 551s
+o0227 hgb done 1148s
+
+==> $W/out/att_s7_AEH_o0331.log <==
+o0331 lgb done 541s
+o0331 hgb done 1150s
+
+==> $W/out/att_s7_AEH_o0430.log <==
+o0430 lgb done 543s
+o0430 hgb done 1159s
+
+==> $W/out/att_s7_C_o0227.log <==
+o0227: att rows train 4,680 future 648 (future game days 36)
+o0227 cat done 486s
+
+==> $W/out/att_s7_C_o0331.log <==
+o0331: att rows train 4,896 future 594 (future game days 33)
+o0331 cat done 518s
+
+==> $W/out/att_s7_C_o0430.log <==
+o0430: att rows train 5,652 future 414 (future game days 23)
+o0430 cat done 547s

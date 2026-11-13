@@ -1,0 +1,12 @@
+start 18:14 | PY_LGB python 3.13.14 (lightgbm 4.6.0, sklearn 1.9.0) | PY_CAT python 3.12.14 (catboost 1.2.10)
+final_att.py C CatBoost GPU (att_ball) max |diff| 3.053e-02 (log1p)
+final_lgb.py C0_lgb_direct IDENTICAL sha256
+final_lgb.py C1_lgb_seasonal_resid IDENTICAL sha256
+final_lgb.py C2_resid_v2_20_nonevent IDENTICAL sha256
+final_lgb.py C3_C2_3127_avg_direct IDENTICAL sha256
+fix_test_yoy.py test_fix.csv.gz IDENTICAL content
+final_att.py - final_att_ev.npy IDENTICAL
+final_hgb.py H (old set) IDENTICAL
+final_att.py A 4000 trees (att) IDENTICAL
+final_att.py C CatBoost CPU (att) IDENTICAL
+spot check done 18:28

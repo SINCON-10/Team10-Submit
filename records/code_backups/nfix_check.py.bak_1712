@@ -1,0 +1,145 @@
+"""Noise-correction terms for the final blend, checked time-ordered. Each term = (a smoother estimate) - (the noisy station-hour
+estimate the models were given), all from data up to the fold origin only:
+  lvl52   (weekend rows) weekday 8-week level + 52-week [day type - weekday] gap  -  own 8-week level
+  wkseas  (weekend rows) partner-year seasonal change of weekdays - of the row's own day type
+  allseas partner-year seasonal change, mean over stations (same date, hour, day type) - own
+  stnseas partner-year seasonal change, mean over the station's hours - own
+  wide    partner-year seasonal change with a +-21-day window - own (+-7 days)
+  l16, l4 16-week / 4-week level - 8-week level (own day type)
+Slopes are fitted by least squares on the selection window (o0227, 2/28-3/31) separately for weekday and weekend/holiday ordinary
+rows, then evaluated on later data of every fold. args: OUT ATT_CSV RAW PV4 [terms for weekday] [terms for weekend]"""
+import contextlib
+import io
+import sys
+import warnings
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+OUT = Path(sys.argv[1]); RAW = Path(sys.argv[3]); sys.path.insert(0, sys.argv[4]); sys.dont_write_bytecode = True
+import preprocess as P  # noqa: E402
+
+EXCL = [3107, 3108, 3109, 3110, 3111, 3127]
+SETS = 'att,attwx,att_smc,attwx_smc,att_d4,att_ball,att_ball_smc'.split(',')
+SRC = {'att': 'att', 'att_ball': 'att', 'att_smc': 'att_smc', 'att_ball_smc': 'att_smc', 'attwx': 'attwx', 'attwx_smc': 'attwx_smc', 'att_d4': 'att_d4'}
+ALL = ['lvl52', 'wkseas', 'allseas', 'stnseas', 'wide', 'l16', 'l4', 'hr52', 'dow52', 'lvl26', 'hr52late', 'lvl52_lo', 'lvl52_hi', 'wkseas_lo', 'wkseas_hi', 'lvl52_sat', 'lvl52_sun', 'wkseas_sat', 'wkseas_sun']
+
+
+def terms(cube, cal, c, a_end, dates, sid, hour):
+    """dict of term arrays for rows (dates, sid, hour) + day type k; cube data after index a_end is never read (c = origin index)."""
+    L8, _ = cube.level(c, 8); L52, _ = cube.level(c, 52); L16, _ = cube.level(c, 16); L4, _ = cube.level(c, 4)
+    k = cal.set_index('date').loc[dates, 'dt3'].to_numpy(); si = pd.Series(sid).map(cube.sidx).to_numpy(); hi = np.asarray(hour) - 6
+    di = np.asarray((pd.DatetimeIndex(dates) - P.START).days); n = len(k)
+    T = {t: np.full(n, np.nan) for t in ALL}
+    T['lvl52'] = np.where(k > 0, (L8[0][si, hi] + (L52[k, si, hi] - L52[0][si, hi])) - L8[k, si, hi], np.nan)
+    T['l16'] = L16[k, si, hi] - L8[k, si, hi]; T['l4'] = L4[k, si, hi] - L8[k, si, hi]
+    # hr52: neighbouring hour's 8-week level + 52-week gap between the two hours - own 8-week level (hour h-1; 6h uses 7h)
+    hn = np.where(hi >= 1, hi - 1, hi + 1)
+    T['hr52'] = (L8[k, si, hn] + (L52[k, si, hi] - L52[k, si, hn])) - L8[k, si, hi]
+    T['hr52late'] = np.where(np.asarray(hour) >= 21, T['hr52'], np.nan)
+    L26, _ = cube.level(c, 26); T['lvl26'] = np.where(k > 0, (L8[0][si, hi] + (L26[k, si, hi] - L26[0][si, hi])) - L8[k, si, hi], np.nan)
+    # dow52 (weekdays): 52-week weekday-of-week effect - the 8-week one the models were given (lvl8_dow)
+    D8, _ = cube.level(c, 8, by='dow'); D52, _ = cube.level(c, 52, by='dow'); dw = cal.set_index('date').loc[dates, 'dow'].to_numpy()
+    T['dow52'] = np.where(k == 0, (D52[dw, si, hi] - L52[0][si, hi]) - (D8[dw, si, hi] - L8[0][si, hi]), np.nan)
+    cp = c - 364
+    if cp - 55 >= 0:
+        L8p, _ = cube.level(cp, 8)
+        for d in np.unique(di):
+            dp = d - 364
+            if dp < 0 or dp + 7 > a_end:
+                continue
+            r = di == d; kk = int(k[r][0]); s_, h_ = si[r], hi[r]
+            own = cube.window_mean(dp, 7, kk, hi_limit=a_end) - L8p[kk]
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                T['allseas'][r] = (np.nanmean(own, axis=0)[None, :] - own)[s_, h_]
+                T['stnseas'][r] = (np.nanmean(own, axis=1)[:, None] - own)[s_, h_]
+            T['wide'][r] = (cube.window_mean(dp, 21, kk, hi_limit=a_end) - L8p[kk] - own)[s_, h_]
+            if kk > 0:
+                T['wkseas'][r] = (cube.window_mean(dp, 7, 0, hi_limit=a_end) - L8p[0] - own)[s_, h_]
+    lo = L8[k, si, hi] < np.log1p(60)   # low-count station-hours (noisier own level)
+    for t in ('lvl52', 'wkseas'):
+        T[t + '_lo'] = np.where(lo, T[t], np.nan); T[t + '_hi'] = np.where(~lo, T[t], np.nan)
+        T[t + '_sat'] = np.where(k == 1, T[t], np.nan); T[t + '_sun'] = np.where(k == 2, T[t], np.nan)
+    return k, T
+
+
+def fold_residuals(o, games):
+    d = OUT / o; p = pd.read_parquet(d / 'preds.parquet')
+    y, ev, V = p.y.to_numpy(), p.ev.eq(1).to_numpy(), p.V.to_numpy(); dt = pd.to_datetime(p.date)
+    s27 = p.station_id.eq(3127).to_numpy(); game = s27 & dt.isin(games).to_numpy(); keep_old = s27 & ev & ~game
+
+    def c9(A, E, C, H):
+        Em = (E + C + H) / 3; M = .8 * Em + .2 * A; B = np.where(ev, M, .8 * M + .2 * V)
+        return np.where(s27, np.where(~ev, A, (A + Em) / 2), B)
+
+    old = c9(p.A.to_numpy(), p.E42.to_numpy(), pd.read_parquet(d / 'preds_base_C.parquet').C.to_numpy(), p.H.to_numpy())
+    Sx = []
+    for s in SETS:
+        a, cc = pd.read_parquet(d / f'preds_{s}_AEH.parquet'), pd.read_parquet(d / f'preds_{s}_C.parquet'); A, E = a.A.to_numpy(), a.E.to_numpy()
+        f = d / f'preds_{s}_e3k_E.parquet'
+        if f.exists():
+            E = pd.read_parquet(f).E.to_numpy()
+        f = d / f'preds_{SRC[s]}_a4k_A.parquet'
+        if o == 'o0227' and SRC[s] == 'att':
+            A1 = pd.read_parquet(d / 'preds_att_acurve_A.parquet').A_4000.to_numpy()
+        else:
+            A1 = pd.read_parquet(f).A.to_numpy() if f.exists() else None
+        if A1 is not None:
+            A = np.where(s27, A, A1)
+        Sx.append(c9(A, E, cc.C.to_numpy(), a.H.to_numpy()))
+    q = np.maximum(np.where(keep_old, old, np.where(game, np.mean(Sx, 0), (old + np.sum(Sx, 0)) / (1 + len(Sx)))), 0)
+    return p, dt, y - q, ev
+
+
+if __name__ == '__main__':
+    games = pd.read_csv(sys.argv[2], parse_dates=['date']).date
+    TW = sys.argv[5].split(',') if len(sys.argv) > 5 else ['allseas', 'stnseas', 'wide', 'l16', 'l4']
+    TE = sys.argv[6].split(',') if len(sys.argv) > 6 else ['lvl52', 'wkseas', 'allseas', 'stnseas', 'wide', 'l16', 'l4']
+    TW = [t for t in TW if t != 'none']; TE = [t for t in TE if t != 'none']
+    train = pd.read_csv(RAW / 'train.csv', parse_dates=['date']); test = pd.read_csv(RAW / 'test.csv', parse_dates=['date']); meta = pd.read_csv(RAW / 'metaData.csv')
+    res = {}
+    for o, od in [('o0227', '2026-02-27'), ('o0331', '2026-03-31'), ('o0430', '2026-04-30')]:
+        with contextlib.redirect_stdout(io.StringIO()):
+            cal = P.build_calendar(); cube = P.Cube(train[train.date <= od], test, meta, cal)
+        c = (pd.Timestamp(od) - P.START).days
+        p, dt, r, ev = fold_residuals(o, games)
+        k, T = terms(cube, cal, c, c, dt, p.station_id.to_numpy(), p.hour.to_numpy())
+        ordn = ~ev & ~p.station_id.isin(EXCL).to_numpy()
+        res[o] = dict(r=r, T=T, k=k, ordn=ordn, dt=dt.to_numpy(), keep=~p.station_id.isin([3110, 3111]).to_numpy())
+
+    def design(R, names, grp):
+        m = R['ordn'] & (R['k'] == 0 if grp == 'wd' else R['k'] > 0)
+        X = np.column_stack([np.where(m & np.isfinite(R['T'][t]), R['T'][t], 0.) for t in names]) if names else np.zeros((len(m), 0))
+        return m, X
+
+    def fit(R, names, grp, before):
+        m, X = design(R, names, grp); s = m & (R['dt'] < np.datetime64(before))
+        if not names:
+            return np.zeros(0), int(s.sum())
+        return np.linalg.lstsq(X[s], R['r'][s], rcond=None)[0], int(s.sum())
+
+    def apply(R, bw, be):
+        _, Xw = design(R, TW, 'wd'); _, Xe = design(R, TE, 'we')
+        return R['r'] - Xw @ bw - Xe @ be
+
+    S = res['o0227']
+    for names, grp in [(TW, 'wd'), (TE, 'we')]:
+        b, n = fit(S, names, grp, '2026-04-01'); print(f'{grp} joint slopes on 2/28-3/31 ({n:,} rows): ' + ' '.join(f'{t} {x:+.3f}' for t, x in zip(names, b)))
+        print('   each alone: ' + ' '.join(f'{t} {fit(S, [t], grp, "2026-04-01")[0][0]:+.3f}' for t in names))
+    bw, _ = fit(S, TW, 'wd', '2026-04-01'); be, _ = fit(S, TE, 'we', '2026-04-01'); z = np.zeros
+    for o, R in res.items():
+        late = R['keep'] & (R['dt'] >= np.datetime64('2026-04-01')) if o == 'o0227' else R['keep']
+        base = np.sqrt((R['r'][late] ** 2).mean())
+
+        def f(rr, late=late, base=base):
+            return np.sqrt((rr[late] ** 2).mean()) - base
+
+        print(f'{o} {"4/1-6/30" if o == "o0227" else "all days"} base {base:.6f} | weekday terms only {f(apply(R, bw, z(len(TE)))):+.6f} '
+              f'| weekend terms only {f(apply(R, z(len(TW)), be)):+.6f} | both {f(apply(R, bw, be)):+.6f}')
+    bw2, _ = fit(S, TW, 'wd', '2026-05-01'); be2, _ = fit(S, TE, 'we', '2026-05-01'); R = res['o0430']; late = R['keep']; base = np.sqrt((R['r'][late] ** 2).mean())
+    print(f'o0430 with slopes fitted on 2/28-4/30 instead: both {np.sqrt((apply(R, bw2, be2)[late] ** 2).mean()) - base:+.6f} | wd '
+          + ' '.join(f'{x:+.3f}' for x in bw2) + ' | we ' + ' '.join(f'{x:+.3f}' for x in be2))
+    bwf, _ = fit(S, TW, 'wd', '2026-07-01'); bef, _ = fit(S, TE, 'we', '2026-07-01')
+    print('slopes fitted on the whole 2/27 fold (2/28-6/30): wd ' + ' '.join(f'{t} {x:+.3f}' for t, x in zip(TW, bwf)) + ' | we ' + ' '.join(f'{t} {x:+.3f}' for t, x in zip(TE, bef)))

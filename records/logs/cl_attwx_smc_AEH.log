@@ -1,0 +1,6 @@
+dropped 34,128 break rows of 3110/3111
+wx added, non-null share train 0.32 test 1.00
+loaded 16s, att rows train 14,166 test 630 (35 games)
+A saved 1271s mean 5.3887
+E saved 1271s mean 5.3834
+H saved 1271s mean 5.3963

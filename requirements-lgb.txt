@@ -1,0 +1,7 @@
+# env 1 (PY_LGB): Python 3.13.14, Windows 11 x64 — LightGBM A/E, HistGB H, data tables, weekend correction (make_c27.py)
+numpy==2.4.2
+pandas==3.0.3
+lightgbm==4.6.0
+scikit-learn==1.9.0
+scipy==1.17.1
+pyarrow==24.0.0

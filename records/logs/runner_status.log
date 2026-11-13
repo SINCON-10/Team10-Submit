@@ -1,0 +1,40 @@
+start final e3k att_d4p 15:59 free 6027 MB
+start final e3k attwx_smc 16:02
+final e3k attwx_smc exit 1 26s 16:02
+start fold e3k att_d4 o0227 16:03
+fold e3k att_d4 o0227 exit 1 5s 16:03
+start final e3k attwx_smc (retry) 16:04
+start fold e3k att_d4 o0227 (retry) 16:12
+start final a4k attwx_smc (retry) 16:18
+final e3k attwx_smc retry done rc=0 1212s 16:25 E saved 1209s mean 5.3868
+start final a4k att_d4 (retry) 16:25
+
+[exited with code 0]
+aux folds (low priority) start 16:28
+final e3k att_d4 (TAG _d4_e3kp) exit 0 1761s 16:29 E saved 1757s mean 5.3719
+fold e3k att_d4 o0227 retry done rc=0 1170s 16:32 o0227 lgb done 1166s
+final a4k attwx_smc retry done rc=0 1113s 16:36 A saved 1111s mean 5.3858
+aux fold a4k attwx o0331 done rc=0 686s 16:39
+old-set upgrade start 16:44
+aux fold a4k att_smc o0331 done rc=0 1096s 16:48
+final a4k att_d4 retry done rc=0 1500s 16:50 A saved 1495s mean 5.3793
+final base a4k done rc=0 519s 16:53
+final base e3k done rc=0 422s 16:55
+fold base a4k o0227 done rc=0 360s 16:56
+aux fold a4k attwx_smc o0331 done rc=0 1476s 16:57
+fold base e3k o0227 done rc=0 228s 16:57
+aux fold base e3k o0331 done rc=0 590s 17:06
+aux fold base e3k o0430 done rc=0 563s 17:07
+aux fold base a4k o0331 done rc=0 806s 17:08
+aux fold base a4k o0430 done rc=0 718s 17:09
+old-set upgrade all done 17:09
+aux fold a4k att_d4 o0331 done rc=0 1972s 17:12
+aux fold e3k att_d4 o0331 done rc=0 1392s 17:13
+aux fold a4k attwx o0430 done rc=0 408s 17:14
+aux fold a4k att_smc o0430 done rc=0 578s 17:22
+aux fold a4k attwx_smc o0430 done rc=0 630s 17:24
+capacity curves start 17:31
+lv127 E rc=0 17:34
+lv127 A rc=0 17:37
+lv255 A rc=0 17:37
+capacity curves all done 17:37

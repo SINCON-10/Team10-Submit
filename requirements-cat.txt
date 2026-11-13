@@ -1,0 +1,7 @@
+# env 2 (PY_CAT): Python 3.12.14, Windows 11 x64 — CatBoost C (CPU, and GPU for the att_ball / att_ball_smc sets),
+# and the blend scripts make_c8 / make_c10 / make_c12 / make_c17 / make_c18 / make_c23 (they load the saved CatBoost model)
+numpy==2.3.5
+pandas==3.0.1
+catboost==1.2.10
+scipy==1.18.1
+pyarrow==26.0.1

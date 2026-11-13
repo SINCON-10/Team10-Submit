@@ -1,0 +1,18 @@
+# competition data (provided by the organizers; put train.csv / test.csv / metaData.csv here locally)
+data/raw/*.csv
+
+# files over GitHub's 100MB limit: use Git LFS or take them from the submission ZIP
+data/processed_v4/train_cutoff_features.csv.gz
+work/out/final_train_d4.parquet
+
+# produced when running the scripts
+work/out_full/
+work/out_spot/
+claude_works/candidates_full/
+claude_works/candidates/submission_RQ_*.csv
+__pycache__/
+*.pyc
+.venv*/
+
+# validation predictions (279MB, kept in the submission ZIP; optional in the repository)
+# records/validation_preds/

@@ -1,0 +1,24 @@
+{
+  "version": "sincon-lab-v4.2",
+  "seed": 42,
+  "inputs": {
+    "preprocess.py": "a5b6015cd48e7287517460729e900040a2fb8ab3ea09d0fed83f845531bae529",
+    "train_processed.csv.gz": "a7cd5a510dcd3f6a1999434acc211886415a4b0e6f0164db55466f90ca16a821",
+    "test_processed.csv.gz": "05da980e1ab1d2a8bdfc54645f028db4f7aed1ba0daf128f81d802c025e7496b",
+    "weather_incheon.csv": "c13eb09182d33d76f8b83f7bef26cf66e9c5fd9506aaeba2094e73bff5ff9509"
+  },
+  "source": {
+    "common.py": "5b64de4369e8654062712ab05d8eb498221ab71b4a2ca6fe1b279c430442af63",
+    "config.py": "b106c2bd1de389c08ba57e388735dc862dcfc768419de32041c9b2d825354aef",
+    "data_v4.py": "ff8562075bad7e2562107894e784ddb0652dc853586c02a0eb56c8b82fd317e1",
+    "tabular.py": "29634135256cc2a6cb3748bfb762ded12b07603ba17cf304f828625438a377fd",
+    "torch_models.py": "d94e945cfa320f9025450c692608f2a58354376dce78cb9bdda46256247d7e57",
+    "sequence_models.py": "7e9d935e625f2bf82449b8f76845ab08d59513d04fac8d6686ff1cce91afd76a",
+    "ensembles.py": "443fff5ebd6fa92d57061f85f7d3b9d59a3076e7428ef8d4967c683d060d4183",
+    "laboratory.py": "fe81ba6eb94cb914eb655b4bb2c346c13cc9e2338470870f398552ab6e11f8d0",
+    "report.py": "c287e9ad2904d51fef837008b4a79ddccf68a1639dea13de2051185522e9b49c",
+    "vendor/sincon_v2.py": "4a4460e428f63ea930342b7c9fda8b85227dad04368e067baedf5cdf2cf12864"
+  },
+  "structural_source": "byte-identical copy of claude_works/sincon_v2.py",
+  "omitted": "large precomputed cutoff tables: reconstructed from v4 processed passenger rows for every origin"
+}

@@ -1,0 +1,5 @@
+dropped 16,056 break rows of 3110/3111
+loaded 43s, att rows train 7,398 test 630 (35 games)
+A saved 1061s mean 5.3838
+E saved 1061s mean 5.3814
+H saved 1061s mean 5.3751

@@ -1,0 +1,10 @@
+nfix_check.py (2026-11-13 18:16): slopes fitted on o0227 2/28-3/31 and on the whole 2/27 fold; evaluated on later windows. C29 uses weekday hr52 and weekend lvl52+wkseas with the whole-fold slopes (.285/.190/.105).
+wd joint slopes on 2/28-3/31 (24,426 rows): hr52 +0.099
+   each alone: hr52 +0.099
+we joint slopes on 2/28-3/31 (12,708 rows): lvl52 +0.196 wkseas +0.136
+   each alone: lvl52 +0.104 wkseas +0.074
+o0227 4/1-6/30 base 0.159237 | weekday terms only -0.000123 | weekend terms only -0.000909 | both -0.001033
+o0331 all days base 0.148548 | weekday terms only -0.000049 | weekend terms only -0.000721 | both -0.000770
+o0430 all days base 0.146121 | weekday terms only -0.000047 | weekend terms only -0.001572 | both -0.001620
+o0430 with slopes fitted on 2/28-4/30 instead: both -0.001998 | wd +0.086 | we +0.366 +0.241
+slopes fitted on the whole 2/27 fold (2/28-6/30): wd hr52 +0.105 | we lvl52 +0.285 wkseas +0.190
